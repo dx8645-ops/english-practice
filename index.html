@@ -1045,7 +1045,7 @@ main {
 
         <!-- HINT -->
         <div class="mic-hint" id="mic-hint">
-          Presiona el micrófono o el botón de abajo para comenzar a grabar. El tiempo comenzará cuando empieces a hablar.
+          Toca 🎤 para grabar. Habla en inglés y luego toca ⏹ para ver tu resultado. El micrófono se reinicia solo si se corta.
         </div>
       </div>
 
@@ -1382,84 +1382,125 @@ function stopAudioViz() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   SPEECH RECOGNITION
+   SPEECH RECOGNITION  — optimizado para Android Chrome
+   Android no soporta bien continuous=true, por eso:
+   • continuous = false (una sesión por vez)
+   • acumulamos el transcript en variable global
+   • al terminar cada sesión, si el usuario sigue grabando
+     reiniciamos automáticamente (restart loop)
+   • el botón "Detener" fuerza la evaluación
 ═══════════════════════════════════════════════════════════ */
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-let   recognizer = null;
-let   finalTranscript = '';
+let recognizer     = null;
+let finalTranscript = '';   // acumulado a través de sesiones
+let shouldRestart  = false; // controla el loop de reinicio
 
 function buildRecognizer() {
   if (!SpeechRecognition) return null;
   const r = new SpeechRecognition();
-  r.continuous      = true;
+  r.continuous      = false;  // false = más estable en Android
   r.interimResults  = true;
   r.lang            = cfg.lang;
-  r.maxAlternatives = 1;
+  r.maxAlternatives = 3;      // más alternativas = mejor precisión
 
   r.onstart = () => {
-    setStatus('rec', 'Escuchando…');
+    setStatus('rec', '🎙 Escuchando… habla ahora');
     document.getElementById('wave-idle').classList.add('hidden');
     document.getElementById('mic-hint').style.display = 'none';
   };
 
   r.onresult = e => {
     let interim = '';
-    finalTranscript = '';
+    let newFinal = '';
     for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript + ' ';
-      else                       interim         += e.results[i][0].transcript;
+      if (e.results[i].isFinal) {
+        // Tomar la mejor alternativa disponible
+        newFinal += e.results[i][0].transcript + ' ';
+      } else {
+        interim += e.results[i][0].transcript;
+      }
     }
+    if (newFinal) finalTranscript += newFinal;
+
     const shown = (finalTranscript + interim).trim();
     if (shown) {
-      const box = document.getElementById('transcript-box');
       document.getElementById('transcript-txt').textContent = shown;
-      box.classList.add('show');
+      document.getElementById('transcript-box').classList.add('show');
     }
   };
 
   r.onerror = e => {
+    console.warn('Speech error:', e.error);
     if (e.error === 'not-allowed' || e.error === 'permission-denied') {
       document.getElementById('perm-error').classList.add('show');
       setStatus('', 'Permiso de micrófono denegado');
+      shouldRestart = false;
+      recording = false;
+      updateRecordUI(false);
     } else if (e.error === 'no-speech') {
-      setStatus('warn', 'No se detectó voz, intenta de nuevo');
+      // En Android "no-speech" es normal, simplemente reiniciamos
+      setStatus('rec', '🎙 Listo, habla cuando quieras…');
+      // onend se disparará y reiniciará si shouldRestart=true
+    } else if (e.error === 'network') {
+      setStatus('warn', '⚠️ Error de red, reintentando…');
     } else {
-      setStatus('warn', 'Error de reconocimiento: ' + e.error);
+      setStatus('warn', 'Error: ' + e.error + ' — intenta de nuevo');
     }
-    recording = false;
-    updateRecordUI(false);
   };
 
   r.onend = () => {
-    if (recording) {
-      // auto-evaluate when recognition ends naturally
-      recording = false;
-      updateRecordUI(false);
+    if (shouldRestart && recording) {
+      // Android termina la sesión solo — la reiniciamos automáticamente
+      // pequeño delay para que el sistema de audio respire
+      setTimeout(() => {
+        if (shouldRestart && recording) {
+          try {
+            recognizer = buildRecognizer();
+            recognizer.start();
+          } catch(err) {
+            console.warn('Restart failed:', err);
+          }
+        }
+      }, 200);
+    } else if (!recording && finalTranscript.trim()) {
+      // El usuario detuvo manualmente — evaluar
       stopAudioViz();
       clearTimer();
       evaluate(finalTranscript.trim());
     }
   };
+
   return r;
 }
 
 function startRecording() {
   if (!SpeechRecognition) {
     document.getElementById('perm-error').classList.add('show');
-    document.getElementById('perm-error').textContent = '⚠️ Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge.';
+    document.getElementById('perm-error').textContent =
+      '⚠️ Tu navegador no soporta reconocimiento de voz. Usa Chrome para Android.';
     return;
   }
+
+  // Reset estado
   finalTranscript = '';
+  shouldRestart   = true;
   document.getElementById('transcript-box').classList.remove('show');
+  document.getElementById('transcript-txt').textContent = '';
   document.getElementById('perm-error').classList.remove('show');
   document.getElementById('result-panel').classList.remove('show');
   document.getElementById('confirm-row').classList.remove('show');
   document.getElementById('legend-row').style.display = 'none';
 
   recognizer = buildRecognizer();
-  recognizer.start();
-  startAudioViz();
+  try {
+    recognizer.start();
+  } catch(e) {
+    console.warn('Start error:', e);
+    setStatus('warn', 'No se pudo iniciar. Toca de nuevo.');
+    return;
+  }
 
+  startAudioViz();
   recording = true;
   revealed  = false;
   updateRecordUI(true);
@@ -1467,13 +1508,32 @@ function startRecording() {
 }
 
 function stopRecording() {
-  if (!recognizer) return;
-  recording = false;
-  recognizer.stop();
+  shouldRestart = false;  // detener el loop de reinicio
+  recording     = false;
+
+  if (recognizer) {
+    try { recognizer.stop(); } catch(e) {}
+  }
+
   stopAudioViz();
   updateRecordUI(false);
   clearTimer();
-  // onend will call evaluate
+
+  // Si hay transcript acumulado, evaluar ahora
+  // Si no, onend lo hará cuando termine
+  const t = finalTranscript.trim();
+  if (t) {
+    evaluate(t);
+  } else {
+    // Dar 800ms por si onresult llega tarde
+    setTimeout(() => {
+      if (!revealed) {
+        const t2 = finalTranscript.trim();
+        if (t2) evaluate(t2);
+        else    showReveal(null);
+      }
+    }, 800);
+  }
 }
 
 function updateRecordUI(isRec) {
