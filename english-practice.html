@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpeakUp – English Practice</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
+
+/* ── TOKENS ── */
+:root {
+  --bg:        #0d0f1a;
+  --s1:        #131626;
+  --s2:        #1a1e31;
+  --s3:        #222740;
+  --border:    rgba(255,255,255,.07);
+  --border2:   rgba(255,255,255,.12);
+  --teal:      #00d4aa;
+  --teal-d:    #00a888;
+  --violet:    #7c6ef5;
+  --violet-d:  #5e50d4;
+  --gold:      #f5c842;
+  --red:       #f5524a;
+  --green:     #2ecc8f;
+  --text:      #eef0f8;
+  --muted:     #7a809e;
+  --dim:       #454963;
+  --r:         16px;
+  --r-sm:      10px;
+  --timer-r:   54px;   /* radius of SVG circle */
+  --circ:      339.3;  /* 2π × 54 */
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+/* ── subtle grid bg ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(124,110,245,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124,110,245,.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── HEADER ── */
+header {
+  position: relative; z-index: 2;
+  width: 100%; max-width: 760px;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.logo {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+  display: flex; align-items: center; gap: 8px;
+}
+.logo-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--teal), var(--violet));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .9rem;
+}
+.logo em { color: var(--teal); font-style: normal; }
+
+.hdr-actions { display: flex; gap: 8px; }
+.icon-btn {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--border2);
+  background: var(--s1);
+  color: var(--muted);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  transition: all .18s;
+}
+.icon-btn:hover { border-color: var(--teal); color: var(--text); }
+
+/* ── MAIN ── */
+main {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 760px;
+  padding: 0 20px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── PROGRESS ── */
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.progress-track {
+  flex: 1;
+  height: 4px;
+  background: var(--s3);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal), var(--violet));
+  border-radius: 99px;
+  transition: width .5s cubic-bezier(.4,0,.2,1);
+}
+.progress-badge {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ── PARAGRAPH CARD ── */
+.para-card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 18px 20px;
+}
+.card-eyebrow {
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.card-eyebrow::before {
+  content: '';
+  display: block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--teal);
+  flex-shrink: 0;
+}
+.para-text {
+  font-size: .92rem;
+  line-height: 1.8;
+  color: var(--muted);
+}
+.para-text .hl {
+  color: var(--teal);
+  font-weight: 600;
+  background: rgba(0,212,170,.08);
+  border-radius: 4px;
+  padding: 0 3px;
+}
+
+/* ── EXERCISE CARD ── */
+.ex-card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+/* card top bar */
+.ex-topbar {
+  background: var(--s2);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ex-badge {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+}
+.ex-num-chip {
+  background: var(--violet);
+  color: #fff;
+  border-radius: 99px;
+  padding: 2px 10px;
+  font-size: .72rem;
+  font-weight: 700;
+}
+.level-chip {
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--teal);
+  border: 1px solid rgba(0,212,170,.3);
+  border-radius: 99px;
+  padding: 3px 10px;
+}
+
+/* card body */
+.ex-body { padding: 22px 22px 20px; }
+
+/* ── TRANSLATE INSTRUCTION ── */
+.translate-label {
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 8px;
+}
+.phrase-box {
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--violet);
+  border-radius: var(--r-sm);
+  padding: 14px 16px;
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+
+/* ── CENTRAL MIC AREA ── */
+.mic-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 0 4px;
+}
+
+/* timer + mic compound widget */
+.timer-mic-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* outer glow ring (pulsates while recording) */
+.glow-ring {
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  background: transparent;
+  border: 2px solid transparent;
+  transition: border-color .3s;
+  pointer-events: none;
+}
+.glow-ring.active {
+  border-color: rgba(0,212,170,.25);
+  animation: pulse-ring 1.6s ease-in-out infinite;
+}
+@keyframes pulse-ring {
+  0%,100% { transform: scale(1); opacity: .6; }
+  50%      { transform: scale(1.06); opacity: 1; }
+}
+
+.timer-svg-wrap {
+  position: relative;
+  width: 160px; height: 160px;
+  flex-shrink: 0;
+}
+.timer-svg {
+  width: 100%; height: 100%;
+  transform: rotate(-90deg);
+}
+.t-bg   { fill:none; stroke: var(--s3); stroke-width: 6; }
+.t-arc  { fill:none; stroke: var(--teal); stroke-width: 6; stroke-linecap: round;
+          stroke-dasharray: var(--circ); stroke-dashoffset: 0;
+          transition: stroke-dashoffset .08s linear, stroke .3s; }
+.t-arc.danger  { stroke: var(--red); }
+.t-arc.stopped { stroke: var(--dim); }
+
+.timer-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2px;
+}
+.timer-num {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text);
+  transition: color .3s;
+}
+.timer-unit {
+  font-size: .62rem;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+/* mic button – lives inside the timer circle */
+.mic-btn {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  /* invisible click-target */
+}
+
+.mic-inner {
+  width: 68px; height: 68px;
+  border-radius: 50%;
+  background: var(--s3);
+  border: 2px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem;
+  transition: all .22s;
+  position: relative;
+}
+.mic-btn:hover .mic-inner,
+.mic-btn:focus .mic-inner {
+  background: var(--s2);
+  border-color: var(--teal);
+  box-shadow: 0 0 0 4px rgba(0,212,170,.15);
+}
+.mic-btn.recording .mic-inner {
+  background: rgba(245,82,74,.15);
+  border-color: var(--red);
+  box-shadow: 0 0 0 6px rgba(245,82,74,.12);
+  animation: mic-pulse .9s ease-in-out infinite;
+}
+@keyframes mic-pulse {
+  0%,100% { box-shadow: 0 0 0 6px rgba(245,82,74,.12); }
+  50%      { box-shadow: 0 0 0 12px rgba(245,82,74,.04); }
+}
+
+/* ── WAVEFORM ── */
+.waveform-wrap {
+  width: 100%;
+  max-width: 420px;
+  height: 52px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#waveform-canvas {
+  width: 100%; height: 100%;
+  border-radius: var(--r-sm);
+  background: var(--s2);
+  border: 1px solid var(--border);
+}
+.waveform-idle-label {
+  position: absolute;
+  font-size: .78rem;
+  color: var(--dim);
+  pointer-events: none;
+  transition: opacity .3s;
+}
+.waveform-idle-label.hidden { opacity: 0; }
+
+/* ── STATUS TEXT ── */
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: .82rem;
+  color: var(--muted);
+  min-height: 24px;
+}
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--dim);
+  transition: background .3s;
+  flex-shrink: 0;
+}
+.status-dot.rec  { background: var(--red); animation: blink .8s ease-in-out infinite; }
+.status-dot.ok   { background: var(--green); animation: none; }
+.status-dot.warn { background: var(--gold); animation: none; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* ── MIC HINT ── */
+.mic-hint {
+  font-size: .74rem;
+  color: var(--dim);
+  text-align: center;
+  line-height: 1.5;
+  max-width: 300px;
+}
+
+/* ── TRANSCRIPT DISPLAY ── */
+.transcript-box {
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 12px 16px;
+  font-size: .92rem;
+  color: var(--muted);
+  font-style: italic;
+  min-height: 44px;
+  display: none;
+  line-height: 1.5;
+  position: relative;
+}
+.transcript-box.show { display: block; }
+.transcript-label {
+  position: absolute;
+  top: -8px; left: 12px;
+  background: var(--s1);
+  padding: 0 6px;
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+/* ── RESULT PANEL ── */
+.result-panel {
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 6px;
+  animation: fade-up .35s ease;
+}
+.result-panel.show { display: flex; }
+@keyframes fade-up {
+  from { opacity:0; transform: translateY(10px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+/* score bar */
+.score-bar-wrap {
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.score-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.score-title-txt {
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+.score-pct {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+  transition: color .4s;
+}
+.score-pct.great  { color: var(--green); }
+.score-pct.good   { color: var(--teal); }
+.score-pct.ok     { color: var(--gold); }
+.score-pct.poor   { color: var(--red); }
+
+.score-track {
+  height: 8px;
+  background: var(--s3);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.score-fill {
+  height: 100%;
+  border-radius: 99px;
+  width: 0%;
+  transition: width .8s cubic-bezier(.4,0,.2,1);
+}
+.score-fill.great { background: var(--green); }
+.score-fill.good  { background: var(--teal); }
+.score-fill.ok    { background: var(--gold); }
+.score-fill.poor  { background: var(--red); }
+
+.score-verdict {
+  font-size: .82rem;
+  font-weight: 600;
+}
+.score-verdict.great { color: var(--green); }
+.score-verdict.good  { color: var(--teal); }
+.score-verdict.ok    { color: var(--gold); }
+.score-verdict.poor  { color: var(--red); }
+
+/* word-by-word diff */
+.diff-section {
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.diff-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.diff-row-label {
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.diff-words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  line-height: 1;
+}
+.word-chip {
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: .82rem;
+  font-weight: 600;
+  letter-spacing: .01em;
+}
+.word-chip.correct {
+  background: rgba(46,204,143,.12);
+  color: var(--green);
+  border: 1px solid rgba(46,204,143,.25);
+}
+.word-chip.wrong {
+  background: rgba(245,82,74,.12);
+  color: var(--red);
+  border: 1px solid rgba(245,82,74,.25);
+}
+.word-chip.missing {
+  background: rgba(245,200,66,.1);
+  color: var(--gold);
+  border: 1px solid rgba(245,200,66,.25);
+  text-decoration: line-through;
+  opacity: .8;
+}
+.word-chip.extra {
+  background: rgba(124,110,245,.1);
+  color: var(--violet);
+  border: 1px solid rgba(124,110,245,.25);
+  font-style: italic;
+}
+.word-chip.neutral {
+  background: var(--s3);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+/* solution box */
+.solution-box {
+  background: rgba(0,212,170,.06);
+  border: 1px solid rgba(0,212,170,.2);
+  border-radius: var(--r-sm);
+  padding: 12px 16px;
+  font-size: .9rem;
+  color: var(--teal);
+  font-weight: 500;
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.solution-box .sol-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+.solution-box strong { font-weight: 700; }
+
+/* ── CONFIRMATION BUTTONS ── */
+.confirm-row {
+  display: none;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.confirm-row.show { display: flex; }
+
+.conf-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 12px 16px;
+  border-radius: var(--r-sm);
+  font-family: 'Inter', sans-serif;
+  font-size: .88rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all .18s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.conf-btn-retry {
+  background: var(--s3);
+  color: var(--muted);
+  border: 1px solid var(--border2);
+}
+.conf-btn-retry:hover {
+  background: var(--s2);
+  color: var(--text);
+  border-color: var(--violet);
+}
+.conf-btn-next {
+  background: linear-gradient(135deg, var(--teal), #00b890);
+  color: var(--bg);
+  font-weight: 700;
+}
+.conf-btn-next:hover { filter: brightness(1.1); }
+.conf-btn-reveal {
+  background: var(--s3);
+  color: var(--muted);
+  border: 1px solid var(--border2);
+}
+.conf-btn-reveal:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ── ACTION ROW (primary) ── */
+.action-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 0 22px 20px;
+}
+.btn-primary-action {
+  flex: 1;
+  padding: 14px;
+  border-radius: var(--r-sm);
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: .95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-start-recording {
+  background: linear-gradient(135deg, var(--violet), var(--violet-d));
+  color: #fff;
+}
+.btn-start-recording:hover { filter: brightness(1.12); }
+.btn-stop-recording {
+  background: rgba(245,82,74,.15);
+  color: var(--red);
+  border: 1.5px solid var(--red);
+}
+.btn-stop-recording:hover { background: rgba(245,82,74,.25); }
+
+.btn-skip {
+  padding: 14px 16px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: .85rem;
+  cursor: pointer;
+  transition: all .18s;
+  white-space: nowrap;
+}
+.btn-skip:hover { border-color: var(--violet); color: var(--text); }
+
+/* ── TIPS ROW ── */
+.tips-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.tip-chip {
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 5px 12px;
+  font-size: .72rem;
+  color: var(--dim);
+  display: flex; align-items: center; gap: 5px;
+}
+.tip-chip span { color: var(--muted); }
+
+/* ── LEGEND ── */
+.legend-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 0 22px 18px;
+}
+.leg-item {
+  display: flex; align-items: center; gap: 5px;
+  font-size: .7rem; color: var(--dim);
+}
+.leg-dot {
+  width: 8px; height: 8px; border-radius: 2px;
+}
+.leg-dot.correct { background: var(--green); }
+.leg-dot.wrong   { background: var(--red); }
+.leg-dot.missing { background: var(--gold); }
+.leg-dot.extra   { background: var(--violet); }
+
+/* ── SETTINGS MODAL ── */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.7);
+  backdrop-filter: blur(6px);
+  z-index: 200;
+  align-items: center; justify-content: center;
+}
+.overlay.open { display: flex; }
+.modal {
+  background: var(--s1);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 28px;
+  width: 90%; max-width: 400px;
+  display: flex; flex-direction: column; gap: 20px;
+}
+.modal-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+.setting-group { display: flex; flex-direction: column; gap: 8px; }
+.setting-label {
+  font-size: .72rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em;
+  color: var(--dim);
+}
+.option-pills {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.pill {
+  padding: 8px 16px;
+  border-radius: 99px;
+  border: 1px solid var(--border2);
+  background: var(--s2);
+  color: var(--muted);
+  font-size: .82rem; font-weight: 600;
+  cursor: pointer; transition: all .16s;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.pill.active, .pill:hover {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: var(--bg);
+}
+.modal-btns { display: flex; gap: 10px; }
+.modal-btn {
+  flex: 1; padding: 12px;
+  border-radius: var(--r-sm);
+  font-family: 'Inter', sans-serif;
+  font-size: .88rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all .18s;
+}
+.modal-btn-cancel {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+}
+.modal-btn-cancel:hover { border-color: var(--violet); color: var(--text); }
+.modal-btn-save {
+  background: var(--teal);
+  color: var(--bg);
+}
+.modal-btn-save:hover { filter: brightness(1.1); }
+
+/* ── SCORE SCREEN ── */
+.score-screen {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 32px 0;
+  text-align: center;
+  animation: fade-up .4s ease;
+}
+.score-screen.show { display: flex; }
+.final-emoji { font-size: 3.5rem; }
+.final-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.7rem; font-weight: 800;
+  letter-spacing: -1px;
+}
+.final-sub { font-size: .9rem; color: var(--muted); }
+
+.stats-grid {
+  display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+  width: 100%;
+}
+.stat-card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 18px 24px;
+  min-width: 110px;
+  flex: 1;
+  max-width: 160px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.stat-card-num {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2.1rem; font-weight: 800; line-height: 1;
+}
+.stat-card-num.teal   { color: var(--teal); }
+.stat-card-num.green  { color: var(--green); }
+.stat-card-num.gold   { color: var(--gold); }
+.stat-card-lbl {
+  font-size: .7rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .07em;
+  color: var(--dim);
+}
+
+/* average score ring */
+.avg-ring-wrap {
+  position: relative;
+  width: 130px; height: 130px;
+  flex-shrink: 0;
+}
+.avg-ring-svg { width:100%; height:100%; transform: rotate(-90deg); }
+.avg-r-bg  { fill:none; stroke:var(--s3); stroke-width:7; }
+.avg-r-arc { fill:none; stroke:var(--teal); stroke-width:7; stroke-linecap:round;
+             stroke-dasharray: 339.3; stroke-dashoffset: 339.3; transition: stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1); }
+.avg-ring-inner {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+}
+.avg-ring-num {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.8rem; font-weight: 800; line-height:1;
+  color: var(--text);
+}
+.avg-ring-unit { font-size:.65rem; color:var(--dim); text-transform:uppercase; letter-spacing:.08em; }
+
+.btn-new-session {
+  background: linear-gradient(135deg, var(--teal), var(--violet));
+  color: #fff;
+  border: none;
+  border-radius: var(--r-sm);
+  padding: 14px 36px;
+  font-family: 'Inter', sans-serif;
+  font-size: .95rem; font-weight: 700;
+  cursor: pointer;
+  transition: filter .18s;
+}
+.btn-new-session:hover { filter: brightness(1.1); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 480px) {
+  .timer-svg-wrap { width: 130px; height: 130px; }
+  .timer-num { font-size: 1.8rem; }
+  .mic-inner { width: 56px; height: 56px; font-size: 1.35rem; }
+  .conf-btn { font-size: .82rem; padding: 11px 12px; }
+  .waveform-wrap { max-width: 100%; }
+}
+
+/* ── TOAST ── */
+#toast {
+  position: fixed;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--s2);
+  border: 1px solid var(--border2);
+  border-radius: 99px;
+  padding: 10px 22px;
+  font-size: .85rem; font-weight: 600;
+  color: var(--text);
+  display: flex; align-items: center; gap: 8px;
+  white-space: nowrap;
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+  z-index: 300;
+  box-shadow: 0 8px 30px rgba(0,0,0,.4);
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── PERMISSION ERROR ── */
+.perm-error {
+  background: rgba(245,82,74,.08);
+  border: 1px solid rgba(245,82,74,.2);
+  border-radius: var(--r-sm);
+  padding: 12px 16px;
+  font-size: .83rem;
+  color: var(--red);
+  display: none;
+  text-align: center;
+  line-height: 1.5;
+}
+.perm-error.show { display: block; }
+
+/* ── SEPARATOR ── */
+.sep {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+</style>
+</head>
+<body>
+
+<!-- SETTINGS MODAL -->
+<div class="overlay" id="settings-overlay">
+  <div class="modal">
+    <div class="modal-title">⚙️ Configuración</div>
+
+    <div class="setting-group">
+      <div class="setting-label">Tiempo por ejercicio</div>
+      <div class="option-pills" id="time-pills">
+        <button class="pill" data-val="30">30 s</button>
+        <button class="pill active" data-val="60">60 s</button>
+        <button class="pill" data-val="90">90 s</button>
+        <button class="pill" data-val="120">2 min</button>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-label">Idioma de reconocimiento</div>
+      <div class="option-pills" id="lang-pills">
+        <button class="pill active" data-val="en-US">🇺🇸 US English</button>
+        <button class="pill" data-val="en-GB">🇬🇧 UK English</button>
+        <button class="pill" data-val="en-AU">🇦🇺 AU English</button>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-label">Nivel de exigencia</div>
+      <div class="option-pills" id="strict-pills">
+        <button class="pill" data-val="50">Flexible</button>
+        <button class="pill active" data-val="70">Normal</button>
+        <button class="pill" data-val="85">Estricto</button>
+      </div>
+    </div>
+
+    <div class="modal-btns">
+      <button class="modal-btn modal-btn-cancel" id="settings-cancel">Cancelar</button>
+      <button class="modal-btn modal-btn-save" id="settings-save">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🎤</div>
+    Speak<em>Up</em>
+  </div>
+  <div class="hdr-actions">
+    <button class="icon-btn" id="info-btn" title="Cómo funciona">?</button>
+    <button class="icon-btn" id="settings-btn" title="Configuración">⚙</button>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- PROGRESS -->
+  <div class="progress-row" id="progress-row">
+    <div class="progress-track"><div class="progress-fill" id="p-fill"></div></div>
+    <div class="progress-badge" id="p-badge">0 / 0</div>
+  </div>
+
+  <!-- PARAGRAPH -->
+  <div class="para-card" id="para-card">
+    <div class="card-eyebrow">Párrafo completo</div>
+    <div class="para-text" id="para-text"></div>
+  </div>
+
+  <!-- EXERCISE CARD -->
+  <div class="ex-card" id="ex-card">
+    <div class="ex-topbar">
+      <div class="ex-badge">
+        Ejercicio <span class="ex-num-chip" id="ex-chip">1</span>
+      </div>
+      <div class="level-chip">A1 – A2</div>
+    </div>
+
+    <div class="ex-body">
+      <!-- TRANSLATE PROMPT -->
+      <div class="translate-label">Traduce al inglés y dilo en voz alta</div>
+      <div class="phrase-box" id="phrase-box"></div>
+
+      <!-- MIC + TIMER -->
+      <div class="mic-area">
+        <div class="timer-mic-wrap">
+          <div class="glow-ring" id="glow-ring"></div>
+          <div class="timer-svg-wrap">
+            <svg class="timer-svg" viewBox="0 0 120 120">
+              <circle class="t-bg" cx="60" cy="60" r="54"/>
+              <circle class="t-arc" id="t-arc" cx="60" cy="60" r="54"/>
+            </svg>
+            <div class="timer-center">
+              <span class="timer-num" id="t-num">60</span>
+              <span class="timer-unit">seg</span>
+            </div>
+            <button class="mic-btn" id="mic-btn" aria-label="Presionar para hablar">
+              <div class="mic-inner" id="mic-inner">🎤</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- WAVEFORM -->
+        <div class="waveform-wrap">
+          <canvas id="waveform-canvas"></canvas>
+          <span class="waveform-idle-label" id="wave-idle">Presiona el micrófono para hablar</span>
+        </div>
+
+        <!-- STATUS -->
+        <div class="status-row">
+          <div class="status-dot" id="status-dot"></div>
+          <span id="status-txt">Listo para escucharte</span>
+        </div>
+
+        <!-- TRANSCRIPT -->
+        <div class="transcript-box" id="transcript-box">
+          <span class="transcript-label">Lo que dijiste</span>
+          <span id="transcript-txt"></span>
+        </div>
+
+        <!-- PERMISSION ERROR -->
+        <div class="perm-error" id="perm-error">
+          🚫 Micrófono no disponible.<br>
+          Por favor permite el acceso al micrófono en tu navegador.
+        </div>
+
+        <!-- HINT -->
+        <div class="mic-hint" id="mic-hint">
+          Presiona el micrófono o el botón de abajo para comenzar a grabar. El tiempo comenzará cuando empieces a hablar.
+        </div>
+      </div>
+
+      <!-- RESULT PANEL -->
+      <div class="result-panel" id="result-panel">
+        <div class="sep"></div>
+
+        <!-- SCORE BAR -->
+        <div class="score-bar-wrap">
+          <div class="score-header">
+            <span class="score-title-txt">Precisión de pronunciación</span>
+            <span class="score-pct" id="score-pct">0%</span>
+          </div>
+          <div class="score-track">
+            <div class="score-fill" id="score-fill"></div>
+          </div>
+          <div class="score-verdict" id="score-verdict"></div>
+        </div>
+
+        <!-- WORD DIFF -->
+        <div class="diff-section" id="diff-section">
+          <div class="diff-row">
+            <div class="diff-row-label">Lo que dijiste</div>
+            <div class="diff-words" id="said-words"></div>
+          </div>
+          <div class="diff-row">
+            <div class="diff-row-label">Respuesta correcta</div>
+            <div class="diff-words" id="correct-words"></div>
+          </div>
+        </div>
+
+        <!-- SOLUTION -->
+        <div class="solution-box" id="solution-box">
+          <span class="sol-icon">✅</span>
+          <span id="sol-text"></span>
+        </div>
+
+        <!-- CONFIRMATION BUTTONS -->
+        <div class="confirm-row" id="confirm-row">
+          <button class="conf-btn conf-btn-retry" id="btn-retry">🔁 Intentar de nuevo</button>
+          <button class="conf-btn conf-btn-next" id="btn-next">Siguiente →</button>
+        </div>
+      </div>
+
+    </div><!-- /ex-body -->
+
+    <!-- LEGEND -->
+    <div class="legend-row" id="legend-row" style="display:none">
+      <div class="leg-item"><div class="leg-dot correct"></div><span>Correcto</span></div>
+      <div class="leg-item"><div class="leg-dot wrong"></div><span>Incorrecto</span></div>
+      <div class="leg-item"><div class="leg-dot missing"></div><span>Faltó decir</span></div>
+      <div class="leg-item"><div class="leg-dot extra"></div><span>Palabra extra</span></div>
+    </div>
+
+    <!-- PRIMARY ACTIONS -->
+    <div class="action-row" id="action-row">
+      <button class="btn-primary-action btn-start-recording" id="btn-record">
+        🎤 Iniciar grabación
+      </button>
+      <button class="btn-skip" id="btn-skip" title="Ver solución sin grabar">Ver solución</button>
+    </div>
+
+  </div><!-- /ex-card -->
+
+  <!-- FINAL SCORE SCREEN -->
+  <div class="score-screen" id="score-screen">
+    <div class="final-emoji" id="final-emoji">🏆</div>
+    <div class="final-title">¡Sesión completada!</div>
+    <div class="final-sub" id="final-sub"></div>
+
+    <div class="avg-ring-wrap">
+      <svg class="avg-ring-svg" viewBox="0 0 120 120">
+        <circle class="avg-r-bg" cx="60" cy="60" r="54"/>
+        <circle class="avg-r-arc" id="avg-arc" cx="60" cy="60" r="54"/>
+      </svg>
+      <div class="avg-ring-inner">
+        <span class="avg-ring-num" id="avg-num">0%</span>
+        <span class="avg-ring-unit">promedio</span>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card-num green" id="s-correct">0</div>
+        <div class="stat-card-lbl">Ejercicios correctos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-num gold" id="s-partial">0</div>
+        <div class="stat-card-lbl">Parciales</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-num teal" id="s-total">0</div>
+        <div class="stat-card-lbl">Total</div>
+      </div>
+    </div>
+
+    <button class="btn-new-session" id="btn-new">🔄 Nueva sesión</button>
+  </div>
+
+</main>
+
+<!-- TOAST -->
+<div id="toast"><span id="toast-icon">✅</span><span id="toast-msg"></span></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════════════════════ */
+const PARAGRAPHS = [
+  {
+    title: "Daily routine",
+    full_en: "My grandfather wakes up every day at seven in the morning. Then he has his breakfast. After that, he washes the dishes. He cleans the house and goes to the fields to work.",
+    exercises: [
+      { es: "Mi abuelo",                                                             en: "My grandfather" },
+      { es: "Mi abuelo se levanta todos los días a las 7 de la mañana",             en: "My grandfather wakes up every day at seven in the morning" },
+      { es: "Luego toma su desayuno",                                                en: "Then he has his breakfast" },
+      { es: "Después de eso lava la loza",                                           en: "After that he washes the dishes" },
+      { es: "Hace aseo de la casa y se dirige al campo a trabajar",                  en: "He cleans the house and goes to the fields to work" }
+    ]
+  },
+  {
+    title: "The market",
+    full_en: "My mother goes to the market every Saturday morning. She buys fruits, vegetables and bread. She always talks to the vendors. She comes back home before noon.",
+    exercises: [
+      { es: "Mi madre",                                                               en: "My mother" },
+      { es: "Mi madre va al mercado todos los sábados por la mañana",               en: "My mother goes to the market every Saturday morning" },
+      { es: "Ella compra frutas, verduras y pan",                                    en: "She buys fruits vegetables and bread" },
+      { es: "Siempre habla con los vendedores",                                      en: "She always talks to the vendors" },
+      { es: "Regresa a casa antes del mediodía",                                     en: "She comes back home before noon" }
+    ]
+  },
+  {
+    title: "Our dog",
+    full_en: "We have a small brown dog. His name is Rocky. He plays in the garden every afternoon. He eats two times a day. He sleeps next to my bed every night.",
+    exercises: [
+      { es: "Nuestro perro",                                                          en: "Our dog" },
+      { es: "Tenemos un perro pequeño y marrón",                                     en: "We have a small brown dog" },
+      { es: "Su nombre es Rocky",                                                    en: "His name is Rocky" },
+      { es: "Él juega en el jardín todas las tardes",                               en: "He plays in the garden every afternoon" },
+      { es: "Come dos veces al día y duerme junto a mi cama cada noche",            en: "He eats two times a day and sleeps next to my bed every night" }
+    ]
+  },
+  {
+    title: "School day",
+    full_en: "Pedro goes to school at eight in the morning. He has five classes every day. He eats lunch with his friends at noon. He comes home at three in the afternoon and does his homework.",
+    exercises: [
+      { es: "Pedro va a la escuela",                                                  en: "Pedro goes to school" },
+      { es: "Pedro va a la escuela a las ocho de la mañana",                        en: "Pedro goes to school at eight in the morning" },
+      { es: "Tiene cinco clases todos los días",                                     en: "He has five classes every day" },
+      { es: "Come con sus amigos al mediodía",                                       en: "He eats lunch with his friends at noon" },
+      { es: "Llega a casa a las tres de la tarde y hace sus tareas",                en: "He comes home at three in the afternoon and does his homework" }
+    ]
+  },
+  {
+    title: "Summer vacation",
+    full_en: "Every summer my family travels to the beach. We swim in the sea and eat fresh fish. My sister builds sand castles. At night we watch the stars together. It is my favorite time of the year.",
+    exercises: [
+      { es: "Cada verano",                                                            en: "Every summer" },
+      { es: "Cada verano mi familia viaja a la playa",                              en: "Every summer my family travels to the beach" },
+      { es: "Nadamos en el mar y comemos pescado fresco",                            en: "We swim in the sea and eat fresh fish" },
+      { es: "Mi hermana construye castillos de arena",                              en: "My sister builds sand castles" },
+      { es: "Por la noche miramos las estrellas. Es mi época favorita del año",     en: "At night we watch the stars together. It is my favorite time of the year" }
+    ]
+  }
+];
+
+/* ═══════════════════════════════════════════════════════════
+   SETTINGS
+═══════════════════════════════════════════════════════════ */
+let cfg = { time: 60, lang: 'en-US', strict: 70 };
+
+function makePillGroup(containerSelector, key) {
+  document.querySelectorAll(`#${containerSelector} .pill`).forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll(`#${containerSelector} .pill`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      cfg[key] = isNaN(btn.dataset.val) ? btn.dataset.val : Number(btn.dataset.val);
+    });
+  });
+}
+makePillGroup('time-pills',   'time');
+makePillGroup('lang-pills',   'lang');
+makePillGroup('strict-pills', 'strict');
+
+document.getElementById('settings-btn').addEventListener('click', () =>
+  document.getElementById('settings-overlay').classList.add('open'));
+document.getElementById('settings-cancel').addEventListener('click', () =>
+  document.getElementById('settings-overlay').classList.remove('open'));
+document.getElementById('settings-save').addEventListener('click', () => {
+  document.getElementById('settings-overlay').classList.remove('open');
+  clearTimer();
+  startTimer();
+  showToast('⚙️', 'Configuración guardada');
+});
+document.getElementById('settings-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+});
+
+/* info btn */
+document.getElementById('info-btn').addEventListener('click', () =>
+  showToast('💡', 'Presiona 🎤, habla en inglés y el sistema analiza tu respuesta'));
+
+/* ═══════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════ */
+let para       = null;
+let exIdx      = 0;
+let timerID    = null;
+let timeLeft   = 60;
+let recording  = false;
+let revealed   = false;
+let scores     = [];   // score per exercise (0-100)
+
+/* ═══════════════════════════════════════════════════════════
+   TIMER
+═══════════════════════════════════════════════════════════ */
+const tArc = document.getElementById('t-arc');
+const tNum = document.getElementById('t-num');
+const CIRC = 339.3;
+
+function startTimer() {
+  timeLeft = cfg.time;
+  tNum.textContent = timeLeft;
+  tArc.classList.remove('danger', 'stopped');
+  tArc.style.strokeDashoffset = 0;
+
+  clearInterval(timerID);
+  timerID = setInterval(() => {
+    timeLeft--;
+    tNum.textContent = timeLeft;
+    const ratio   = Math.max(0, timeLeft / cfg.time);
+    tArc.style.strokeDashoffset = CIRC * (1 - ratio);
+    if (ratio <= .25 && ratio > 0) tArc.classList.add('danger');
+    if (timeLeft <= 0) {
+      clearInterval(timerID);
+      tArc.classList.add('stopped');
+      tArc.classList.remove('danger');
+      if (recording) stopRecording();
+      else { revealed = true; showReveal(null); }
+    }
+  }, 1000);
+}
+
+function clearTimer() { clearInterval(timerID); }
+function pauseTimer() { clearInterval(timerID); }
+
+/* ═══════════════════════════════════════════════════════════
+   WAVEFORM
+═══════════════════════════════════════════════════════════ */
+const canvas    = document.getElementById('waveform-canvas');
+const ctx2d     = canvas.getContext('2d');
+let   animFrame = null;
+let   analyser  = null;
+let   dataArr   = null;
+let   audioCtx  = null;
+let   mediaStream = null;
+let   srcNode   = null;
+
+function resizeCanvas() {
+  canvas.width  = canvas.offsetWidth  * window.devicePixelRatio;
+  canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+  ctx2d.scale(window.devicePixelRatio, window.devicePixelRatio);
+}
+window.addEventListener('resize', resizeCanvas);
+setTimeout(resizeCanvas, 100);
+
+function drawIdle() {
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  ctx2d.clearRect(0,0,W,H);
+  ctx2d.strokeStyle = 'rgba(69,73,99,.6)';
+  ctx2d.lineWidth = 1.5;
+  ctx2d.beginPath();
+  ctx2d.moveTo(0, H/2);
+  ctx2d.lineTo(W, H/2);
+  ctx2d.stroke();
+}
+
+function drawWave() {
+  animFrame = requestAnimationFrame(drawWave);
+  if (!analyser) return;
+  analyser.getByteTimeDomainData(dataArr);
+
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  ctx2d.clearRect(0,0,W,H);
+
+  // gradient stroke
+  const grad = ctx2d.createLinearGradient(0,0,W,0);
+  grad.addColorStop(0,   'rgba(0,212,170,.2)');
+  grad.addColorStop(0.5, 'rgba(0,212,170,1)');
+  grad.addColorStop(1,   'rgba(124,110,245,.6)');
+
+  ctx2d.lineWidth   = 2;
+  ctx2d.strokeStyle = grad;
+  ctx2d.beginPath();
+
+  const sliceW = W / dataArr.length;
+  let x = 0;
+  for (let i = 0; i < dataArr.length; i++) {
+    const v = dataArr[i] / 128.0;
+    const y = (v * H) / 2;
+    if (i === 0) ctx2d.moveTo(x, y);
+    else         ctx2d.lineTo(x, y);
+    x += sliceW;
+  }
+  ctx2d.lineTo(W, H/2);
+  ctx2d.stroke();
+}
+
+async function startAudioViz() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 512;
+    dataArr = new Uint8Array(analyser.frequencyBinCount);
+    srcNode = audioCtx.createMediaStreamSource(mediaStream);
+    srcNode.connect(analyser);
+    cancelAnimationFrame(animFrame);
+    drawWave();
+  } catch(e) {
+    console.warn('Audio viz failed', e);
+  }
+}
+
+function stopAudioViz() {
+  cancelAnimationFrame(animFrame);
+  if (srcNode)   { try { srcNode.disconnect(); } catch(_){} srcNode = null; }
+  if (mediaStream) {
+    mediaStream.getTracks().forEach(t => t.stop());
+    mediaStream = null;
+  }
+  analyser = null;
+  drawIdle();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SPEECH RECOGNITION
+═══════════════════════════════════════════════════════════ */
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let   recognizer = null;
+let   finalTranscript = '';
+
+function buildRecognizer() {
+  if (!SpeechRecognition) return null;
+  const r = new SpeechRecognition();
+  r.continuous      = true;
+  r.interimResults  = true;
+  r.lang            = cfg.lang;
+  r.maxAlternatives = 1;
+
+  r.onstart = () => {
+    setStatus('rec', 'Escuchando…');
+    document.getElementById('wave-idle').classList.add('hidden');
+    document.getElementById('mic-hint').style.display = 'none';
+  };
+
+  r.onresult = e => {
+    let interim = '';
+    finalTranscript = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript + ' ';
+      else                       interim         += e.results[i][0].transcript;
+    }
+    const shown = (finalTranscript + interim).trim();
+    if (shown) {
+      const box = document.getElementById('transcript-box');
+      document.getElementById('transcript-txt').textContent = shown;
+      box.classList.add('show');
+    }
+  };
+
+  r.onerror = e => {
+    if (e.error === 'not-allowed' || e.error === 'permission-denied') {
+      document.getElementById('perm-error').classList.add('show');
+      setStatus('', 'Permiso de micrófono denegado');
+    } else if (e.error === 'no-speech') {
+      setStatus('warn', 'No se detectó voz, intenta de nuevo');
+    } else {
+      setStatus('warn', 'Error de reconocimiento: ' + e.error);
+    }
+    recording = false;
+    updateRecordUI(false);
+  };
+
+  r.onend = () => {
+    if (recording) {
+      // auto-evaluate when recognition ends naturally
+      recording = false;
+      updateRecordUI(false);
+      stopAudioViz();
+      clearTimer();
+      evaluate(finalTranscript.trim());
+    }
+  };
+  return r;
+}
+
+function startRecording() {
+  if (!SpeechRecognition) {
+    document.getElementById('perm-error').classList.add('show');
+    document.getElementById('perm-error').textContent = '⚠️ Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge.';
+    return;
+  }
+  finalTranscript = '';
+  document.getElementById('transcript-box').classList.remove('show');
+  document.getElementById('perm-error').classList.remove('show');
+  document.getElementById('result-panel').classList.remove('show');
+  document.getElementById('confirm-row').classList.remove('show');
+  document.getElementById('legend-row').style.display = 'none';
+
+  recognizer = buildRecognizer();
+  recognizer.start();
+  startAudioViz();
+
+  recording = true;
+  revealed  = false;
+  updateRecordUI(true);
+  startTimer();
+}
+
+function stopRecording() {
+  if (!recognizer) return;
+  recording = false;
+  recognizer.stop();
+  stopAudioViz();
+  updateRecordUI(false);
+  clearTimer();
+  // onend will call evaluate
+}
+
+function updateRecordUI(isRec) {
+  const micBtn   = document.getElementById('mic-btn');
+  const micInner = document.getElementById('mic-inner');
+  const glow     = document.getElementById('glow-ring');
+  const btnRec   = document.getElementById('btn-record');
+
+  if (isRec) {
+    micBtn.classList.add('recording');
+    micInner.textContent = '⏹';
+    glow.classList.add('active');
+    btnRec.className = 'btn-primary-action btn-stop-recording';
+    btnRec.innerHTML = '⏹ Detener grabación';
+  } else {
+    micBtn.classList.remove('recording');
+    micInner.textContent = '🎤';
+    glow.classList.remove('active');
+    btnRec.className = 'btn-primary-action btn-start-recording';
+    btnRec.innerHTML = '🎤 Iniciar grabación';
+    document.getElementById('wave-idle').classList.remove('hidden');
+    if (!revealed) setStatus('', 'Listo para escucharte');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EVALUATE
+═══════════════════════════════════════════════════════════ */
+function normalizeWord(w) {
+  return w.toLowerCase()
+    .replace(/[.,!?;:'"-]/g,'')
+    .replace(/\s+/g,'')
+    .trim();
+}
+
+function computeScore(said, expected) {
+  const sWords = said.split(/\s+/).filter(Boolean).map(normalizeWord);
+  const eWords = expected.split(/\s+/).filter(Boolean).map(normalizeWord);
+
+  if (!sWords.length) return { pct: 0, sWords, eWords, matched: [] };
+
+  // Levenshtein-based word alignment
+  let matchCount = 0;
+  const matched  = new Array(eWords.length).fill(false);
+  const sMatched = new Array(sWords.length).fill(false);
+
+  eWords.forEach((ew, ei) => {
+    // Try exact first
+    const exactIdx = sWords.findIndex((sw, si) => !sMatched[si] && sw === ew);
+    if (exactIdx !== -1) { matched[ei] = 'correct'; sMatched[exactIdx] = true; matchCount++; return; }
+    // Fuzzy: allow 1 char diff for words >=4 chars
+    if (ew.length >= 4) {
+      const fuzzyIdx = sWords.findIndex((sw, si) => !sMatched[si] && levenshtein(sw,ew) <= 1);
+      if (fuzzyIdx !== -1) { matched[ei] = 'correct'; sMatched[fuzzyIdx] = true; matchCount += 0.7; return; }
+    }
+    matched[ei] = 'missing';
+  });
+
+  // extra words (said but not expected)
+  const extras = sWords.filter((_, i) => !sMatched[i]);
+
+  const pct = Math.round((matchCount / eWords.length) * 100);
+  return { pct: Math.min(100, pct), matched, eWords, sWords, extras };
+}
+
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({length:m+1},(_,i) => [i, ...Array(n).fill(0)]);
+  for (let j=0;j<=n;j++) dp[0][j]=j;
+  for (let i=1;i<=m;i++) for(let j=1;j<=n;j++)
+    dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1] : 1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+  return dp[m][n];
+}
+
+function evaluate(transcript) {
+  revealed = true;
+  const ex  = para.exercises[exIdx];
+
+  if (!transcript) {
+    showReveal(null);
+    return;
+  }
+
+  const result = computeScore(transcript, ex.en);
+  showReveal(result);
+}
+
+function showReveal(result) {
+  const ex  = para.exercises[exIdx];
+  const pct = result ? result.pct : 0;
+  scores.push(pct);
+
+  /* Score bar */
+  const cls = pct >= 85 ? 'great' : pct >= 65 ? 'good' : pct >= 40 ? 'ok' : 'poor';
+  const verdicts = {
+    great: '🏆 ¡Excelente pronunciación!',
+    good:  '👍 Buena pronunciación, sigue practicando',
+    ok:    '💪 Casi, inténtalo de nuevo',
+    poor:  '📚 Necesitas practicar más esta frase'
+  };
+
+  const pctEl   = document.getElementById('score-pct');
+  const fillEl  = document.getElementById('score-fill');
+  const verdEl  = document.getElementById('score-verdict');
+  pctEl.textContent = pct + '%';
+  pctEl.className   = 'score-pct ' + cls;
+  verdEl.textContent = verdicts[cls];
+  verdEl.className   = 'score-verdict ' + cls;
+
+  setTimeout(() => { fillEl.style.width = pct+'%'; fillEl.className = 'score-fill '+cls; }, 50);
+
+  /* Word diff */
+  const saidEl    = document.getElementById('said-words');
+  const correctEl = document.getElementById('correct-words');
+  saidEl.innerHTML = '';
+  correctEl.innerHTML = '';
+
+  if (result) {
+    // Said words
+    result.sWords.forEach(w => {
+      const chip = document.createElement('span');
+      chip.className = 'word-chip neutral';
+      chip.textContent = w;
+      saidEl.appendChild(chip);
+    });
+    // Expected words with match info
+    result.eWords.forEach((w, i) => {
+      const chip = document.createElement('span');
+      chip.className = 'word-chip ' + (result.matched[i] === 'correct' ? 'correct' : 'missing');
+      chip.textContent = w;
+      correctEl.appendChild(chip);
+    });
+    // Extras
+    result.extras.forEach(w => {
+      const chip = document.createElement('span');
+      chip.className = 'word-chip extra';
+      chip.textContent = w + ' ⊕';
+      saidEl.appendChild(chip);
+    });
+  } else {
+    saidEl.innerHTML = '<span class="word-chip wrong">— sin respuesta —</span>';
+    ex.en.split(/\s+/).forEach(w => {
+      const chip = document.createElement('span');
+      chip.className = 'word-chip missing';
+      chip.textContent = w;
+      correctEl.appendChild(chip);
+    });
+  }
+
+  /* Solution */
+  document.getElementById('sol-text').innerHTML =
+    '<strong>Respuesta correcta:</strong> ' + ex.en;
+
+  /* Transcript for no-result case */
+  if (!result) {
+    const box = document.getElementById('transcript-box');
+    document.getElementById('transcript-txt').textContent = '(sin audio detectado)';
+    box.classList.add('show');
+  }
+
+  /* Show panels */
+  document.getElementById('result-panel').classList.add('show');
+  document.getElementById('confirm-row').classList.add('show');
+  document.getElementById('legend-row').style.display = 'flex';
+  setStatus('ok', result ? `Análisis completado · ${pct}% de precisión` : 'Solución mostrada');
+
+  /* Stop recording UI cleanup */
+  updateRecordUI(false);
+
+  /* Toast */
+  const toastMap = { great:'🏆 ¡Excelente!', good:'👍 ¡Bien!', ok:'💪 ¡Casi!', poor:'📚 Practica más' };
+  showToast(toastMap[cls].split(' ')[0], toastMap[cls].split(' ').slice(1).join(' '));
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════════════ */
+function loadExercise(idx) {
+  revealed = false;
+  recording = false;
+  finalTranscript = '';
+  clearTimer();
+
+  const ex    = para.exercises[idx];
+  const total = para.exercises.length;
+
+  /* header */
+  document.getElementById('ex-chip').textContent = idx + 1;
+  document.getElementById('p-badge').textContent = `${idx+1} / ${total}`;
+  document.getElementById('p-fill').style.width  = `${(idx / total)*100}%`;
+
+  /* phrase */
+  document.getElementById('phrase-box').textContent = ex.es;
+
+  /* highlight paragraph */
+  const full = para.full_en;
+  const seg  = ex.en;
+  const i    = full.toLowerCase().indexOf(seg.toLowerCase().split(' ')[0]);
+  if (i !== -1) {
+    const matchIdx = full.toLowerCase().indexOf(seg.toLowerCase());
+    if (matchIdx !== -1) {
+      document.getElementById('para-text').innerHTML =
+        esc(full.substring(0, matchIdx)) +
+        '<span class="hl">' + esc(full.substring(matchIdx, matchIdx + seg.length)) + '</span>' +
+        esc(full.substring(matchIdx + seg.length));
+    } else {
+      document.getElementById('para-text').textContent = full;
+    }
+  }
+
+  /* reset UI */
+  document.getElementById('result-panel').classList.remove('show');
+  document.getElementById('confirm-row').classList.remove('show');
+  document.getElementById('legend-row').style.display = 'none';
+  document.getElementById('transcript-box').classList.remove('show');
+  document.getElementById('perm-error').classList.remove('show');
+  document.getElementById('mic-hint').style.display = '';
+  document.getElementById('wave-idle').classList.remove('hidden');
+  updateRecordUI(false);
+  setStatus('', 'Listo para escucharte');
+  drawIdle();
+
+  /* timer */
+  startTimer();
+}
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function goNext() {
+  exIdx++;
+  if (exIdx >= para.exercises.length) { showFinal(); return; }
+  loadExercise(exIdx);
+}
+
+function retry() {
+  revealed = false;
+  document.getElementById('result-panel').classList.remove('show');
+  document.getElementById('confirm-row').classList.remove('show');
+  document.getElementById('legend-row').style.display = 'none';
+  document.getElementById('transcript-box').classList.remove('show');
+  document.getElementById('mic-hint').style.display = '';
+  document.getElementById('wave-idle').classList.remove('hidden');
+  setStatus('', 'Listo para escucharte');
+  startTimer();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FINAL SCREEN
+═══════════════════════════════════════════════════════════ */
+function showFinal() {
+  clearTimer();
+  document.getElementById('ex-card').style.display   = 'none';
+  document.getElementById('para-card').style.display = 'none';
+  document.getElementById('progress-row').style.display = 'none';
+  const screen = document.getElementById('score-screen');
+  screen.classList.add('show');
+
+  const avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0;
+  const perfect = scores.filter(s=>s>=85).length;
+  const partial = scores.filter(s=>s>=40&&s<85).length;
+
+  document.getElementById('avg-num').textContent = avg + '%';
+  document.getElementById('s-correct').textContent = perfect;
+  document.getElementById('s-partial').textContent = partial;
+  document.getElementById('s-total').textContent   = scores.length;
+
+  const emoji = avg >= 85 ? '🏆' : avg >= 65 ? '🌟' : avg >= 40 ? '💪' : '📚';
+  document.getElementById('final-emoji').textContent = emoji;
+  document.getElementById('final-sub').textContent =
+    `Párrafo: "${para.title}" · ${scores.length} ejercicios completados`;
+
+  /* animate ring */
+  const offset = 339.3 * (1 - avg/100);
+  setTimeout(() => document.getElementById('avg-arc').style.strokeDashoffset = offset, 100);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   START SESSION
+═══════════════════════════════════════════════════════════ */
+function startSession() {
+  para  = PARAGRAPHS[Math.floor(Math.random() * PARAGRAPHS.length)];
+  exIdx = 0;
+  scores = [];
+
+  document.getElementById('ex-card').style.display   = '';
+  document.getElementById('para-card').style.display = '';
+  document.getElementById('progress-row').style.display = '';
+  document.getElementById('score-screen').classList.remove('show');
+  document.getElementById('avg-arc').style.strokeDashoffset = 339.3;
+
+  loadExercise(0);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STATUS
+═══════════════════════════════════════════════════════════ */
+function setStatus(type, msg) {
+  const dot = document.getElementById('status-dot');
+  dot.className = 'status-dot' + (type ? ' '+type : '');
+  document.getElementById('status-txt').textContent = msg;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════════ */
+let toastTimer;
+function showToast(icon, msg) {
+  const el = document.getElementById('toast');
+  document.getElementById('toast-icon').textContent = icon;
+  document.getElementById('toast-msg').textContent  = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EVENT WIRING
+═══════════════════════════════════════════════════════════ */
+// Mic button (circle)
+document.getElementById('mic-btn').addEventListener('click', () => {
+  if (!recording) startRecording();
+  else            stopRecording();
+});
+
+// Primary record button
+document.getElementById('btn-record').addEventListener('click', () => {
+  if (!recording) startRecording();
+  else            stopRecording();
+});
+
+// Skip / reveal
+document.getElementById('btn-skip').addEventListener('click', () => {
+  if (recording) { stopAudioViz(); clearTimer(); recording = false; }
+  recognizer && recognizer.abort();
+  updateRecordUI(false);
+  revealed = true;
+  showReveal(null);
+});
+
+// Retry
+document.getElementById('btn-retry').addEventListener('click', retry);
+
+// Next
+document.getElementById('btn-next').addEventListener('click', goNext);
+
+// New session
+document.getElementById('btn-new').addEventListener('click', startSession);
+
+/* ═══════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════ */
+drawIdle();
+startSession();
+</script>
+</body>
+</html>
